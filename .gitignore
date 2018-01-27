@@ -1,5 +1,5 @@
 
-# Created by https://www.gitignore.io/api/csharp,database,aspnetcore
+# Created by https://www.gitignore.io/api/csharp,aspnetcore
 
 ### ASPNETCore ###
 ## Ignore Visual Studio temporary files, build results, and
@@ -415,13 +415,5 @@ typings/
 *.odx.cs
 *.xsd.cs
 
-### Database ###
-*.accdb
-*.db
-*.dbf
-*.mdb
-*.sql
-*.sqlite3
 
-
-# End of https://www.gitignore.io/api/csharp,database,aspnetcore
+# End of https://www.gitignore.io/api/csharp,aspnetcore
