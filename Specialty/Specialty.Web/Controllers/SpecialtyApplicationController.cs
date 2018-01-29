@@ -16,20 +16,37 @@ namespace Specialty.Web.Controllers
             return View();
         }
 
+        public JsonResult TakeSelectedNodes(int[] selectedIds)
+        {
+            if (selectedIds == null) return Json(null);
+            List<EnrolmentUnit> selected = new List<EnrolmentUnit>();
+            TreeHandler handler = new TreeHandler();
+            foreach(var id in selectedIds)
+            {
+                selected.Concat(handler.GetGrandestChildren(id));
+            }
+            Session["selected"] = selected;
+            return Json(selected, JsonRequestBehavior.AllowGet);
+        }
+
         public JsonResult GetDirectChildren(int nodeId)
         {
-            return Json(new TreeHandler().GetDirectChildren(nodeId), JsonRequestBehavior.AllowGet);
+            IEnumerable<EnrolmentUnit> children = new TreeHandler().GetDirectChildren(nodeId);
+            return Json(children.Select(child => new { fullName = child.FullName, shortName = child.ShortName, id = child.Id }), JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetGrandestChildren(int nodeId)
+        public JsonResult GetCourses()
         {
-            return Json(new TreeHandler().GetGrandestChildren(nodeId), JsonRequestBehavior.AllowGet);
+            //Session["selected"] = new List<EnrolmentUnit>(new SpecialtyRepository().EnrolmentUnits.Where(u => u.Id == 9 || u.Id == 10));
+            if (Session["selected"] == null) return Json(null);
+            return Json(new Querier().GetAvailableCourses((IEnumerable<EnrolmentUnit>)Session["selected"]), JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetSpecialty(int parentId, int course, int formId, int paymentId, int termId, int nameId)
+        public JsonResult GetSpecialties(int course, int formId, int paymentId, int termId, int nameId)
         {
-            var specialty = new Querier().FindSpecialty(parentId, course, formId, paymentId, termId, nameId);
-            return Json(specialty, JsonRequestBehavior.AllowGet);
+            if (Session["selected"] == null) return Json(null);
+            var specialties = new Querier().GetAvailableSpecialties((IEnumerable<EnrolmentUnit>)Session["selected"], course, formId, paymentId, termId, nameId);
+            return Json(specialties, JsonRequestBehavior.AllowGet);
         }
     }
 }

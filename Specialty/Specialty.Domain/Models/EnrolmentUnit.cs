@@ -8,6 +8,11 @@ namespace Specialty.Domain.Models
 {
     public class EnrolmentUnit
     {
+        public EnrolmentUnit()
+        {
+            DirectEnrolmentUnits = new HashSet<DirectEnrolmentUnit>();
+        }
+
         public int Id { get; set; }
         public string FullName { get; set; }
         public string ShortName { get; set; }
@@ -16,5 +21,7 @@ namespace Specialty.Domain.Models
 
         public virtual EnrolmentUnit Parent { get; set; }
         public virtual EnrolmentUnitType EnrolmentUnitType { get; set; }
+
+        public virtual ICollection<DirectEnrolmentUnit> DirectEnrolmentUnits { get; set; }
     }
 }
