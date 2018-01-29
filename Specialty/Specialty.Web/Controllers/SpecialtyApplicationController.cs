@@ -18,12 +18,18 @@ namespace Specialty.Web.Controllers
 
         public JsonResult GetDirectChildren(int nodeId)
         {
-            return Json(TreeHandler.GetDirectChildren(nodeId), JsonRequestBehavior.AllowGet);
+            return Json(new TreeHandler().GetDirectChildren(nodeId), JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetGrandestChildren(int nodeId)
         {
-            return Json(TreeHandler.GetGrandestChildren(nodeId), JsonRequestBehavior.AllowGet);
+            return Json(new TreeHandler().GetGrandestChildren(nodeId), JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetSpecialty(int parentId, int course, int formId, int paymentId, int termId, int nameId)
+        {
+            var specialty = new Querier().FindSpecialty(parentId, course, formId, paymentId, termId, nameId);
+            return Json(specialty, JsonRequestBehavior.AllowGet);
         }
     }
 }

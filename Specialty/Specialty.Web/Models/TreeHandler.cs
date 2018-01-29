@@ -7,21 +7,16 @@ using Specialty.Domain.Models;
 
 namespace Specialty.Web.Models
 {
-    public static class TreeHandler
+    public class TreeHandler
     {
-        private static SpecialtyRepository repository;
+        private SpecialtyRepository repository = new SpecialtyRepository();
 
-        static TreeHandler()
-        {
-            repository = new SpecialtyRepository();
-        }
-
-        public static IEnumerable<EnrolmentUnit> GetDirectChildren(int nodeId)
+        public IEnumerable<EnrolmentUnit> GetDirectChildren(int nodeId)
         {
             return repository.EnrolmentUnits.Where(u => u.ParentId == nodeId);
         }
 
-        public static IEnumerable<EnrolmentUnit> GetGrandestChildren(int nodeId)
+        public IEnumerable<EnrolmentUnit> GetGrandestChildren(int nodeId)
         {
             EnrolmentUnit node = FindNode(nodeId);
             List<EnrolmentUnit> grandestChildren = new List<EnrolmentUnit>();
@@ -29,7 +24,7 @@ namespace Specialty.Web.Models
             return grandestChildren;
         }
 
-        private static void GrandestChildrenSearchRecursion(EnrolmentUnit node, List<EnrolmentUnit> storage)
+        private void GrandestChildrenSearchRecursion(EnrolmentUnit node, List<EnrolmentUnit> storage)
         {
             var children = GetDirectChildren(node.Id);
             if (children.Count() == 0)
@@ -43,7 +38,7 @@ namespace Specialty.Web.Models
             }
         }
 
-        private static EnrolmentUnit FindNode(int nodeId)
+        private EnrolmentUnit FindNode(int nodeId)
         {
             return repository.EnrolmentUnits.Where(u => u.Id == nodeId).SingleOrDefault();
         }
