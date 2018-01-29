@@ -11,7 +11,8 @@ namespace Specialty.Domain.Repository
     {
         private SpecialtyContext context = new SpecialtyContext();
 
-        public IQueryable<GovernmentSpecialty> GovernmentSpecialties => context.GovernmentSpecialties;
-        public IQueryable<DirectEnrolmentUnit> DirectEnrollmentUnits => context.DirectEnrolmentUnits;
+        public IEnumerable<GovernmentSpecialty> GovernmentSpecialties => context.GovernmentSpecialties;
+        public IEnumerable<DirectEnrolmentUnit> DirectEnrolmentUnits => context.DirectEnrolmentUnits;
+        public IEnumerable<EnrolmentUnit> EnrolmentUnits => context.EnrolmentUnits;
     }
 }

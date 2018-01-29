@@ -14,9 +14,9 @@ namespace Specialty.Domain.Repository
         public DbSet<EducationForm> EducationForms { get; set; }
         public DbSet<EducationPayment> EducationPayments { get; set; }
         public DbSet<EducationTerm> EducationTerms { get; set; }
-        public DbSet<EnrolmentGroup> EducationGroups { get; set; }
-        public DbSet<EnrolmentUnit> EducationUnits { get; set; }
-        public DbSet<EnrolmentUnitType> EducationUnitTypes { get; set; }
+        public DbSet<EnrolmentGroup> EnrolmentGroups { get; set; }
+        public DbSet<EnrolmentUnit> EnrolmentUnits { get; set; }
+        public DbSet<EnrolmentUnitType> EnrolmentUnitTypes { get; set; }
         public DbSet<GovernmentSpecialty> GovernmentSpecialties { get; set; }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
