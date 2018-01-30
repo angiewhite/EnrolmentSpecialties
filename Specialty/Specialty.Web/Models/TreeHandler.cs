@@ -13,12 +13,14 @@ namespace Specialty.Web.Models
 
         public IEnumerable<EnrolmentUnit> GetDirectChildren(int nodeId)
         {
+            if (nodeId == 0) return repository.EnrolmentUnits.Where(u => u.ParentId == null);
             return repository.EnrolmentUnits.Where(u => u.ParentId == nodeId);
         }
 
         public IEnumerable<EnrolmentUnit> GetGrandestChildren(int nodeId)
         {
             EnrolmentUnit node = FindNode(nodeId);
+            if (nodeId == 0) node = new EnrolmentUnit();
             List<EnrolmentUnit> grandestChildren = new List<EnrolmentUnit>();
             GrandestChildrenSearchRecursion(node, grandestChildren);
             return grandestChildren;

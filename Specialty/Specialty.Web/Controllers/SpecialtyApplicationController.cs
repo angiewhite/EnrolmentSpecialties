@@ -13,33 +13,53 @@ namespace Specialty.Web.Controllers
     {
         private static IEnumerable<EnrolmentUnit> selectedUnits;
 
+        private Func<DirectEnrolmentUnit, object> selector = s => new
+        {
+            name = s.GovernmentSpecialty.ShortName,
+            form = s.EducationForm.ShortName,
+            term = s.EducationTerm.ShortName,
+            qualification = s.GovernmentSpecialty.Qualification,
+            payment = s.EducationPayment.ShortName,
+            id = s.Id,
+            year = s.Year
+        };
+
+        private Func<EnrolmentUnit, object> unitSelector = child => new { fullName = child.FullName, shortName = child.ShortName, id = child.Id, count = new TreeHandler().GetDirectChildren(child.Id).Count() };
+
         public ActionResult Index()
         {
             return View();
-        }
-
+        } 
+        
+        [System.Web.Services.WebMethod]
         public JsonResult TakeSelectedNodes(int[] selectedIds)
         {
-            if (selectedIds == null) return null;
-            List<EnrolmentUnit> selected = new List<EnrolmentUnit>();
+            if (selectedIds == null || selectedIds.Length == 0) return null;
+            IEnumerable<EnrolmentUnit> selected = new List<EnrolmentUnit>();
             TreeHandler handler = new TreeHandler();
             foreach(var id in selectedIds)
             {
-                selected.Concat(handler.GetGrandestChildren(id));
+                selected = selected.Concat(handler.GetGrandestChildren(id));
             }
             selectedUnits = selected;
-            return Json(selected, JsonRequestBehavior.AllowGet);
+            return Json(selected.Select(unitSelector), JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetDirectChildren(int nodeId)
         {
-            IEnumerable<EnrolmentUnit> children = new TreeHandler().GetDirectChildren(nodeId);
-            return Json(children.Select(child => new { fullName = child.FullName, shortName = child.ShortName, id = child.Id }), JsonRequestBehavior.AllowGet);
+            TreeHandler handler = new TreeHandler();
+            IEnumerable<EnrolmentUnit> children = handler.GetDirectChildren(nodeId);
+            return Json(children.Select(unitSelector), JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetCourses()
         {
             return Json(new Querier().GetAvailableCourses(selectedUnits), JsonRequestBehavior.AllowGet);
+        }
+
+        public JsonResult GetGroupedSpecialties(int groupId)
+        {
+            return Json(new Querier().GetGroupedSpecialties(groupId).Select(selector), JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetAvailableCategories(int? course, int? formId, int? paymentId, int? termId, int? nameId)
@@ -79,16 +99,7 @@ namespace Specialty.Web.Controllers
                 };
             } else
             {
-                return Json(specialties.Select(s => new
-                {
-                    name = s.GovernmentSpecialty.ShortName,
-                    form = s.EducationForm.ShortName,
-                    term = s.EducationTerm.ShortName,
-                    qualification = s.GovernmentSpecialty.Qualification,
-                    payment = s.EducationPayment.ShortName,
-                    id = s.Id,
-                    year = s.Year
-                }), JsonRequestBehavior.AllowGet);
+                return Json(specialties.Select(selector), JsonRequestBehavior.AllowGet);
             }
 
             var categories = specialties.Select(propertySelector).Distinct();

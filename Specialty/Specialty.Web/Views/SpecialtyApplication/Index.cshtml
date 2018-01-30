@@ -10,9 +10,71 @@
 <head>
     <meta name="viewport" content="width=device-width" />
     <title>Index</title>
+    <link href="~/Content/bootstrap.css" rel="stylesheet" type="text/css"/>
+    <link href="~/Content/bootstrap.min.css" rel="stylesheet" type="text/css"/>
+    <link href="~/Content/bootstrap-theme.css" rel="stylesheet" type="text/css"/>
+    <link href="~/Content/grid.css" rel="stylesheet" type="text/css"/>
+    <link href="~/Content/checkbox.css" rel="stylesheet" type="text/css"/>
+    <script src="~/Scripts/jquery-3.3.1.js"></script>
+    <script src="~/Scripts/Tree.js"></script>
+    <script>
+        var fullyChecked = []
+
+        $(document).ready(function () {
+            tree("root", "/SpecialtyApplication/GetDirectChildren")
+
+            $('#root').change(function (eventObj) {
+                fullyChecked = []
+                var target = $(eventObj.target)
+                var childInputs = target.parent().find("input")
+                childInputs.prop("checked", target.prop("checked"))
+                checkParents(target)
+                collectFullyChecked($("#rootInput"))
+                if (fullyChecked.length == 0) return;
+                $.ajax({
+                    type: 'POST',
+                    url: "/SpecialtyApplication/TakeSelectedNodes",
+                    data: JSON.stringify(fullyChecked),
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (data, status, xhr) {
+                        alert(data)
+                    }
+                })
+            })
+        })
+
+        function collectFullyChecked(input) {
+            if (isFullyChecked(input)) {
+                fullyChecked.push(input.parent().prop("id"))
+            } else {
+                input.parent().children("ul").children("li").children("input").each(function () {
+                    collectFullyChecked($(this))
+                })
+            }
+        }
+
+        function isFullyChecked(target) {
+            return target.parent().find("input").length == target.parent().find("input:checked").length
+        }
+    </script>
 </head>
 <body>
-    <div> 
+    <div class="panel panel-success"> 
+        <div class="panel-heading text-center"><h4>Подача заявления на специальность</h4></div>
+        <div class="panel-body">
+            <div class="form-group">
+                <label>Выберите места подачи заявок</label>
+                <ul class="Container" id="root">
+                    <li id="0" class="Node IsRoot IsLast ExpandClosed">
+                        <div class="Expand"></div>
+                        <input id="rootInput" type="checkbox"/>
+                        <div class="Content">Места</div>
+                        <ul class="Container"></ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </div>
 </body>
 </html>
