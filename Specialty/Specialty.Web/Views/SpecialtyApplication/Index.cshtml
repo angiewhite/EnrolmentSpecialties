@@ -40,9 +40,33 @@
                 })
             })
 
-            $("#course").change(function (eventObj) {
+            $("#course").change(function () {
                 var selectedId = $(this).find(":selected").prop("id")
                 sendRequest({ course: selectedId }, formsLoaded)
+            })
+
+            $("#form").change(function () {
+                var selectedId = $(this).find(":selected").prop("id")
+                sendRequest({ course: $("#course").find(":selected").prop("id"), formId: selectedId }, termsLoaded)     
+            })
+
+            $("#term").change(function () {
+                var selectedId = $(this).find(":selected").prop("id")
+                sendRequest({
+                    course: $("#course").find(":selected").prop("id"),
+                    formId: $("#form").find(":selected").prop("id"),
+                    termId: selectedId
+                }, paymentsLoaded)
+            })
+
+            $("#payment").change(function () {
+                var selectedId = $(this).find(":selected").prop("id")
+                sendRequest({
+                    course: $("#course").find(":selected").prop("id"),
+                    formId: $("#form").find(":selected").prop("id"),
+                    termId: $("#term").find(":selected").prop("id"),
+                    paymentId: selectedId
+                }, namesLoaded)
             })
         })
 
@@ -56,6 +80,18 @@
 
         function formsLoaded(data, status, xhr) {
             handleHtml(data, "form", "id", "fullName")
+        }
+
+        function termsLoaded(data, status, xhr) {
+            handleHtml(data, "term", "id", "fullName")
+        }
+
+        function paymentsLoaded(data, status, xhr) {
+            handleHtml(data, "payment", "id", "fullName")
+        }
+
+        function namesLoaded(data, status, xhr) {
+            handleHtml(data, "name", "id", "fullName")
         }
 
         function handleHtml(data, controlId, id, text)

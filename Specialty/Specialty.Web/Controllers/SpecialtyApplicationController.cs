@@ -83,12 +83,12 @@ namespace Specialty.Web.Controllers
             else if (formId == null)
             {
                 propertySelector = (u) => u.EducationForm;
-            } else if (paymentId == null)
-            {
-                propertySelector = (u) => u.EducationPayment;
             } else if (termId == null)
             {
                 propertySelector = (u) => u.EducationTerm;
+            } else if (paymentId == null)
+            {
+                propertySelector = (u) => u.EducationPayment;
             } else if (nameId == null)
             {
                 propertySelector = (u) => u.GovernmentSpecialty;
