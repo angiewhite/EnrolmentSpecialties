@@ -30,19 +30,57 @@
                 childInputs.prop("checked", target.prop("checked"))
                 checkParents(target)
                 collectFullyChecked($("#rootInput"))
-                if (fullyChecked.length == 0) return;
                 $.ajax({
                     type: 'POST',
                     url: "/SpecialtyApplication/TakeSelectedNodes",
                     data: JSON.stringify(fullyChecked),
                     contentType: "application/json; charset=utf-8",
                     dataType: "json",
-                    success: function (data, status, xhr) {
-                        alert(data)
-                    }
+                    success: nodesSelected
                 })
             })
+
+            $("#course").change(function (eventObj) {
+                var selectedId = $(this).find(":selected").prop("id")
+                sendRequest({ course: selectedId }, formsLoaded)
+            })
         })
+
+        function nodesSelected(data, status, xhr) {
+            sendRequest(JSON.stringify(""), coursesLoaded)
+        }
+
+        function coursesLoaded(data, status, xhr) {
+            handleHtml(data, "course", null, null)
+        }
+
+        function formsLoaded(data, status, xhr) {
+            handleHtml(data, "form", "id", "fullName")
+        }
+
+        function handleHtml(data, controlId, id, text)
+        {
+            $("#" + controlId).children().remove();
+            $("#" + controlId).append("<option id=\"0\">--</option>");
+            for (key in data) {
+                var object = data[key];
+                var elementId = id == null ? object : object[id]
+                var content = text == null ? object : object[text]
+                $("#" + controlId).append("<option id=" + elementId + ">" + content + "</option>")
+            }
+            $("#" + controlId).trigger("change")
+        }
+
+        function sendRequest(data, callback) {
+            $.ajax({
+                type: 'GET',
+                url: "/SpecialtyApplication/GetAvailableCategories",
+                data: data,
+                contentType: "application/json; charset=utf-8",
+                dataType: "json",
+                success: callback
+            })
+        }
 
         function collectFullyChecked(input) {
             if (isFullyChecked(input)) {
@@ -73,6 +111,26 @@
                         <ul class="Container"></ul>
                     </li>
                 </ul>
+            </div>
+            <div class="form-group">
+                <label>Курс</label>
+                <select class="form-control" id="course"><option id="0">--</option></select>
+            </div>
+            <div class="form-group">
+                <label>Форма обучения</label>
+                <select class="form-control" id="form"><option id="0">--</option></select>
+            </div>
+            <div class="form-group">
+                <label>Срок обучения</label>
+                <select class="form-control" id="term"><option id="0">--</option></select>
+            </div>
+            <div class="form-group">
+                <label>Форма оплаты</label>
+                <select class="form-control" id="payment"><option id="0">--</option></select>
+            </div>
+            <div class="form-group">
+                <label>Название</label>
+                <select class="form-control" id="name"><option id="0">--</option></select>
             </div>
         </div>
     </div>

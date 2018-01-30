@@ -23,7 +23,6 @@ namespace Specialty.Web.Controllers
             id = s.Id,
             year = s.Year
         };
-
         private Func<EnrolmentUnit, object> unitSelector = child => new { fullName = child.FullName, shortName = child.ShortName, id = child.Id, count = new TreeHandler().GetDirectChildren(child.Id).Count() };
 
         public ActionResult Index()
@@ -31,10 +30,13 @@ namespace Specialty.Web.Controllers
             return View();
         } 
         
-        [System.Web.Services.WebMethod]
         public JsonResult TakeSelectedNodes(int[] selectedIds)
         {
-            if (selectedIds == null || selectedIds.Length == 0) return null;
+            if (selectedIds == null || selectedIds.Length == 0)
+            {
+                selectedUnits = null;
+                return Json(Enumerable.Empty<EnrolmentUnit>(), JsonRequestBehavior.AllowGet);
+            }
             IEnumerable<EnrolmentUnit> selected = new List<EnrolmentUnit>();
             TreeHandler handler = new TreeHandler();
             foreach(var id in selectedIds)
@@ -42,7 +44,7 @@ namespace Specialty.Web.Controllers
                 selected = selected.Concat(handler.GetGrandestChildren(id));
             }
             selectedUnits = selected;
-            return Json(selected.Select(unitSelector), JsonRequestBehavior.AllowGet);
+            return Json("ok", JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetDirectChildren(int nodeId)
@@ -54,20 +56,21 @@ namespace Specialty.Web.Controllers
 
         public JsonResult GetCourses()
         {
-            return Json(new Querier().GetAvailableCourses(selectedUnits), JsonRequestBehavior.AllowGet);
+            var result = new Querier().GetAvailableCourses(selectedUnits);
+            return Json(result == null ? Enumerable.Empty<int>() : result, JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetGroupedSpecialties(int groupId)
         {
-            return Json(new Querier().GetGroupedSpecialties(groupId).Select(selector), JsonRequestBehavior.AllowGet);
+            var specialties = new Querier().GetGroupedSpecialties(groupId);
+            return Json(specialties == null ? Enumerable.Empty<object>() : specialties.Select(selector), JsonRequestBehavior.AllowGet);
         }
 
         public JsonResult GetAvailableCategories(int? course, int? formId, int? paymentId, int? termId, int? nameId)
         {
-            selectedUnits = new List<EnrolmentUnit>(new SpecialtyRepository().EnrolmentUnits.Where(u => u.Id == 2));
-            if (selectedUnits == null) return null;
+            if (selectedUnits == null) return Json(Enumerable.Empty<object>(), JsonRequestBehavior.AllowGet);
             var specialties = new Querier().GetAvailableSpecialties(selectedUnits, course, formId, paymentId, termId, nameId);
-            if (specialties == null) return null;
+            if (specialties == null) return Json(Enumerable.Empty<object>(), JsonRequestBehavior.AllowGet);
 
             Func<DirectEnrolmentUnit, object> propertySelector = null;
             Func<object, object> newObjectSelector = (o) => new
@@ -80,8 +83,7 @@ namespace Specialty.Web.Controllers
             else if (formId == null)
             {
                 propertySelector = (u) => u.EducationForm;
-            }
-            else if (paymentId == null)
+            } else if (paymentId == null)
             {
                 propertySelector = (u) => u.EducationPayment;
             } else if (termId == null)
