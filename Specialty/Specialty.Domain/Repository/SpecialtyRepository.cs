@@ -14,5 +14,6 @@ namespace Specialty.Domain.Repository
         public IQueryable<DirectEnrolmentUnit> DirectEnrolmentUnits => context.DirectEnrolmentUnits;
         public IQueryable<EnrolmentUnit> EnrolmentUnits => context.EnrolmentUnits;
         public IQueryable<GovernmentSpecialty> GovernmentSpecialties => context.GovernmentSpecialties;
+        public IQueryable<EnrolmentGroup> EnrolmentGroups => context.EnrolmentGroups;
     }
 }

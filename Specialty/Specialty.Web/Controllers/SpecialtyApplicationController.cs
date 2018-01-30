@@ -11,6 +11,8 @@ namespace Specialty.Web.Controllers
 {
     public class SpecialtyApplicationController : Controller
     {
+        private static IEnumerable<EnrolmentUnit> selectedUnits;
+
         public ActionResult Index()
         {
             return View();
@@ -18,14 +20,14 @@ namespace Specialty.Web.Controllers
 
         public JsonResult TakeSelectedNodes(int[] selectedIds)
         {
-            if (selectedIds == null) return Json(null);
+            if (selectedIds == null) return null;
             List<EnrolmentUnit> selected = new List<EnrolmentUnit>();
             TreeHandler handler = new TreeHandler();
             foreach(var id in selectedIds)
             {
                 selected.Concat(handler.GetGrandestChildren(id));
             }
-            Session["selected"] = selected;
+            selectedUnits = selected;
             return Json(selected, JsonRequestBehavior.AllowGet);
         }
 
@@ -37,16 +39,60 @@ namespace Specialty.Web.Controllers
 
         public JsonResult GetCourses()
         {
-            //Session["selected"] = new List<EnrolmentUnit>(new SpecialtyRepository().EnrolmentUnits.Where(u => u.Id == 9 || u.Id == 10));
-            if (Session["selected"] == null) return Json(null);
-            return Json(new Querier().GetAvailableCourses((IEnumerable<EnrolmentUnit>)Session["selected"]), JsonRequestBehavior.AllowGet);
+            return Json(new Querier().GetAvailableCourses(selectedUnits), JsonRequestBehavior.AllowGet);
         }
 
-        public JsonResult GetSpecialties(int course, int formId, int paymentId, int termId, int nameId)
+        public JsonResult GetAvailableCategories(int? course, int? formId, int? paymentId, int? termId, int? nameId)
         {
-            if (Session["selected"] == null) return Json(null);
-            var specialties = new Querier().GetAvailableSpecialties((IEnumerable<EnrolmentUnit>)Session["selected"], course, formId, paymentId, termId, nameId);
-            return Json(specialties, JsonRequestBehavior.AllowGet);
+            selectedUnits = new List<EnrolmentUnit>(new SpecialtyRepository().EnrolmentUnits.Where(u => u.Id == 2));
+            if (selectedUnits == null) return null;
+            var specialties = new Querier().GetAvailableSpecialties(selectedUnits, course, formId, paymentId, termId, nameId);
+            if (specialties == null) return null;
+
+            Func<DirectEnrolmentUnit, object> propertySelector = null;
+            Func<object, object> newObjectSelector = (o) => new
+            {
+                fullName = ((dynamic)o).FullName,
+                shortName = ((dynamic)o).ShortName,
+                id = ((dynamic)o).Id
+            };
+            if (course == null) return GetCourses();
+            else if (formId == null)
+            {
+                propertySelector = (u) => u.EducationForm;
+            }
+            else if (paymentId == null)
+            {
+                propertySelector = (u) => u.EducationPayment;
+            } else if (termId == null)
+            {
+                propertySelector = (u) => u.EducationTerm;
+            } else if (nameId == null)
+            {
+                propertySelector = (u) => u.GovernmentSpecialty;
+                newObjectSelector = (n) => new
+                {
+                    fullName = ((GovernmentSpecialty)n).FullName,
+                    shortName = ((GovernmentSpecialty)n).ShortName,
+                    id = ((GovernmentSpecialty)n).Id,
+                    qualification = ((GovernmentSpecialty)n).Qualification
+                };
+            } else
+            {
+                return Json(specialties.Select(s => new
+                {
+                    name = s.GovernmentSpecialty.ShortName,
+                    form = s.EducationForm.ShortName,
+                    term = s.EducationTerm.ShortName,
+                    qualification = s.GovernmentSpecialty.Qualification,
+                    payment = s.EducationPayment.ShortName,
+                    id = s.Id,
+                    year = s.Year
+                }), JsonRequestBehavior.AllowGet);
+            }
+
+            var categories = specialties.Select(propertySelector).Distinct();
+            return Json(categories.Select(newObjectSelector), JsonRequestBehavior.AllowGet);
         }
     }
 }

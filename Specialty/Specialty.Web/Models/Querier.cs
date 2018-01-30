@@ -14,7 +14,9 @@ namespace Specialty.Web.Models
 
         public IEnumerable<int> GetAvailableCourses(IEnumerable<EnrolmentUnit> selectedUnits)
         {
-            var courses = GetAvailableSpecialties(selectedUnits).Select(s => currentYear + 1 - s.Year).Distinct();
+            var specialties = GetAvailableSpecialties(selectedUnits);
+            if (specialties == null) yield break;
+            var courses = specialties.Select(s => currentYear + 1 - s.Year).Distinct();
             if (courses.Contains(1)) yield return 1;
             if (courses.Contains(2)) yield return 2;
         }
@@ -35,6 +37,13 @@ namespace Specialty.Web.Models
         {
             if (selectedUnits == null) return null;
             return selectedUnits.SelectMany(unit => unit.DirectEnrolmentUnits).Distinct();
+        }
+
+        public IEnumerable<DirectEnrolmentUnit> GetGroupedSpecialties(int groupId)
+        {
+            var group = repository.EnrolmentGroups.Where(g => g.Id == groupId).SingleOrDefault();
+            if (group == null) return null;
+            return group.DirectEnrolmentUnits;
         }
     }
 }
