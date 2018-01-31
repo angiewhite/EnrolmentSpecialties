@@ -25,11 +25,11 @@ namespace Specialty.Web.Models
         {
             var available = GetAvailableSpecialties(selectedUnits);
             if (available == null) return null;
-            if (course != null) available = available.Where(s => s.Year == currentYear + 1 - course);
-            if (formId != null) available = available.Where(s => s.EducationFormId == formId);
-            if (paymentId != null) available = available.Where(s => s.EducationPaymentId == paymentId);
-            if (termId != null) available = available.Where(s => s.EducationTermId == termId);
-            if (nameId != null) available = available.Where(s => s.GovernmentSpecialtyId == nameId);
+            if (course != null && course != 0) available = available.Where(s => s.Year == currentYear + 1 - course);
+            if (formId != null && formId != 0) available = available.Where(s => s.EducationFormId == formId);
+            if (paymentId != null && paymentId != 0) available = available.Where(s => s.EducationPaymentId == paymentId);
+            if (termId != null && termId != 0) available = available.Where(s => s.EducationTermId == termId);
+            if (nameId != null && nameId != 0) available = available.Where(s => s.GovernmentSpecialtyId == nameId);
             return available;
         }
 

@@ -21,7 +21,8 @@ namespace Specialty.Web.Controllers
             qualification = s.GovernmentSpecialty.Qualification,
             payment = s.EducationPayment.ShortName,
             id = s.Id,
-            year = s.Year
+            year = s.Year,
+            unit = s.ParentEnrolmentUnit.ShortName
         };
         private Func<EnrolmentUnit, object> unitSelector = child => new { fullName = child.FullName, shortName = child.ShortName, id = child.Id, count = new TreeHandler().GetDirectChildren(child.Id).Count() };
 
@@ -79,17 +80,17 @@ namespace Specialty.Web.Controllers
                 shortName = ((dynamic)o).ShortName,
                 id = ((dynamic)o).Id
             };
-            if (course == null) return GetCourses();
-            else if (formId == null)
+            if (course == null || course == 0) return GetCourses();
+            else if (formId == null || formId == 0)
             {
                 propertySelector = (u) => u.EducationForm;
-            } else if (termId == null)
+            } else if (termId == null || termId == 0)
             {
                 propertySelector = (u) => u.EducationTerm;
-            } else if (paymentId == null)
+            } else if (paymentId == null || paymentId == 0)
             {
                 propertySelector = (u) => u.EducationPayment;
-            } else if (nameId == null)
+            } else if (nameId == null || nameId == 0)
             {
                 propertySelector = (u) => u.GovernmentSpecialty;
                 newObjectSelector = (n) => new

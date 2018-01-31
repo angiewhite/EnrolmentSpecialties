@@ -41,32 +41,48 @@
             })
 
             $("#course").change(function () {
-                var selectedId = $(this).find(":selected").prop("id")
-                sendRequest({ course: selectedId }, formsLoaded)
+                if (getSelectedId("course") == 0) formsLoaded()
+                else sendRequest({
+                    course: getSelectedId("course")
+                }, formsLoaded)
             })
 
             $("#form").change(function () {
-                var selectedId = $(this).find(":selected").prop("id")
-                sendRequest({ course: $("#course").find(":selected").prop("id"), formId: selectedId }, termsLoaded)     
+                if (getSelectedId("form") == 0) termsLoaded()
+                else sendRequest({
+                    course: getSelectedId("course"),
+                    formId: getSelectedId("form")
+                }, termsLoaded)     
             })
 
             $("#term").change(function () {
-                var selectedId = $(this).find(":selected").prop("id")
-                sendRequest({
-                    course: $("#course").find(":selected").prop("id"),
-                    formId: $("#form").find(":selected").prop("id"),
-                    termId: selectedId
+                if (getSelectedId("term") == 0) paymentsLoaded()
+                else sendRequest({
+                    course: getSelectedId("course"),
+                    formId: getSelectedId("form"),
+                    termId: getSelectedId("term")
                 }, paymentsLoaded)
             })
 
             $("#payment").change(function () {
-                var selectedId = $(this).find(":selected").prop("id")
-                sendRequest({
-                    course: $("#course").find(":selected").prop("id"),
-                    formId: $("#form").find(":selected").prop("id"),
-                    termId: $("#term").find(":selected").prop("id"),
-                    paymentId: selectedId
+                if (getSelectedId("payment") == 0) namesLoaded()
+                else sendRequest({
+                    course: getSelectedId("course"),
+                    formId: getSelectedId("form"),
+                    termId: getSelectedId("term"),
+                    paymentId: getSelectedId("payment"),
                 }, namesLoaded)
+            })
+
+            $("#name").change(function () {
+                if (getSelectedId("name") == 0) specialtiesLoaded()
+                else sendRequest({
+                    course: getSelectedId("course"),
+                    formId: getSelectedId("form"),
+                    termId: getSelectedId("term"),
+                    paymentId: getSelectedId("payment"),
+                    nameId: getSelectedId("name")
+                }, specialtiesLoaded)
             })
         })
 
@@ -94,8 +110,29 @@
             handleHtml(data, "name", "id", "fullName")
         }
 
+        function specialtiesLoaded(data, status, xhr) {
+            var previouslySelected = getSelectedId("specialty")
+            $("#specialty").children().remove();
+            $("#specialty").append("<option id=\"0\">--</option>");
+            for (key in data) {
+                var object = data[key];
+                $("#specialty").append("<option id=" + object.id + ">"
+                    + object.name + ", "
+                    + object.qualification + ", "
+                    + object.unit
+                    + "</option>")
+            }
+            $("#specialty").find("#" + previouslySelected).prop("selected", true)
+            $("#specialty").trigger("change")
+        }
+
+        function getSelectedId(id) {
+            return $("#" + id).find(":selected").prop("id")
+        }
+
         function handleHtml(data, controlId, id, text)
         {
+            var previouslySelected = getSelectedId(controlId)    
             $("#" + controlId).children().remove();
             $("#" + controlId).append("<option id=\"0\">--</option>");
             for (key in data) {
@@ -104,6 +141,7 @@
                 var content = text == null ? object : object[text]
                 $("#" + controlId).append("<option id=" + elementId + ">" + content + "</option>")
             }
+            $("#" + controlId).find("#" + previouslySelected).prop("selected", true)
             $("#" + controlId).trigger("change")
         }
 
@@ -167,6 +205,14 @@
             <div class="form-group">
                 <label>Название</label>
                 <select class="form-control" id="name"><option id="0">--</option></select>
+            </div>
+            <div class="form-group">
+                <label>Выберите доступную специальность</label>
+                <select class="form-control" id="specialty"><option id="0">--</option></select>
+            </div>
+            <div id="display" class="form-group" style="display: none">
+                <label>Вы выбрали</label>
+                <div></div>
             </div>
         </div>
     </div>
